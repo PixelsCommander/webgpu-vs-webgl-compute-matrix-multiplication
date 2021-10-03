@@ -1,16 +1,19 @@
 async function webgl_matrix_test() {
 
     const device = await initGPUDevice();
-    
+
     // work up through different sizes of matrices
     var log = "";
-    for (var sz=16; sz<=4096 ; sz*=2) {
+    for (var sz=16; sz<=8192 ; sz*=1.4) {
         // set up
 
+        sz = Math.round(sz);
         // Can use NPOT sizes ok
         var n = sz, matrixSide = sz;
 
-        await multiplyWebGPU(matrixSide, device);
+        if (sz < 5120) {
+            await multiplyWebGPU(matrixSide, device);
+        }
 
         // create a few test matrices
         mmCount     = matrixCount(matrixSide);
@@ -24,19 +27,22 @@ async function webgl_matrix_test() {
         // calculate number of ops
         var ops = 2.0*n*n*n - n*n;
 
+        window.results[matrixSide] = window.results[matrixSide] || {};
         window.results[matrixSide]['ops'] = ops;
 
-        // multiply them on webgl
-        var start = (new Date()).getTime();
-        result = mm1.multiply(mm2);
-        var dur = (new Date()).getTime()-start;
-        var gflops = Math.round(ops / (dur*10000))/100;
+        if (n<=4096) {
+            // multiply them on webgl
+            var start = (new Date()).getTime();
+            result = mm1.multiply(mm2);
+            var dur = (new Date()).getTime() - start;
+            var gflops = Math.round(ops / (dur * 10000)) / 100;
 
-        window.results[mm1.r]['WebGL'] = dur;
+            window.results[mm1.r]['WebGL'] = dur;
 
-        log += mm1.r + "x" + mm1.c + " x " + mm2.r + "x" + mm2.c + " matrices in " + dur +
-              " msec. (webgl) " + gflops + " GFlops \n";
-        
+            log += mm1.r + "x" + mm1.c + " x " + mm2.r + "x" + mm2.c + " matrices in " + dur +
+                " msec. (webgl) " + gflops + " GFlops \n";
+        }
+
         // multiply smaller ones in js and check result
         if (n<=1024) {
             var start = (new Date()).getTime();
@@ -47,7 +53,7 @@ async function webgl_matrix_test() {
             window.results[mm1.r]['JavaScript'] = dur;
 
             log += mm1.r+"x"+mm1.c+" x "+mm2.r+"x"+mm2.c+" matrices in "+dur+
-                   " msec. (Javascript) " + gflops + " GFlops \n";
+                " msec. (Javascript) " + gflops + " GFlops \n";
 
             // check the result
             var err = 0, errterm = 0, errmax = 0, errjs = 0, errwebgl = 0;
@@ -66,7 +72,7 @@ async function webgl_matrix_test() {
         }
         else
             log += "Skipped for Javascript\n" +
-                    "Multiply ops:      " + ops + "\n";
+                "Multiply ops:      " + ops + "\n";
     }
     return log;
 }
@@ -78,7 +84,7 @@ function matrixIdentity(n) {
     var m = [];
     for(var i=0;i<n;++i) {
         for(var j=0;j<n;++j) {
-            if(i==j) m.push(1); else m.push(0); 
+            if(i==j) m.push(1); else m.push(0);
         }
     }
     return webgl_matrix.create(n,n,m);

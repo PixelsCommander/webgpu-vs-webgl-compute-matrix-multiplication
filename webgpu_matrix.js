@@ -183,7 +183,7 @@ async function multiplyWebGPU(matrixSize, device) {
 
     // Read buffer.
     await gpuReadBuffer.mapAsync(GPUMapMode.READ);
-    const arrayBuffer = gpuReadBuffer.getMappedRange();
+    window.webGPUarrayBuffer = gpuReadBuffer.getMappedRange();
     const endTime = Date.now();
     window.results[matrixSize] = window.results[matrixSize] || {};
     window.results[matrixSize]['WebGPU'] = endTime - startTime;
