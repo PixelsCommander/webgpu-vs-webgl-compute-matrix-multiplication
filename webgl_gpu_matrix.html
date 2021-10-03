@@ -1,0 +1,116 @@
+<html>
+<head>
+
+<script type="text/javascript" src="./webgl_matrix.js"></script>
+<script type="text/javascript" src="./webgpu_matrix.js"></script>
+<script type="text/javascript" src="./webgl_matrix.test.js"></script>
+
+<style type=text/css>
+	body {
+		text-align: center;
+		font-family: "Helvetica Neue";
+		background-color: black;
+		color: white;
+	}
+
+	input {
+		padding: 10px;
+	}
+
+	.matrix-size {
+		font-size: 48px;
+	}
+	.result-cell {
+		vertical-align: baseline;
+	}
+	.header-row {
+		color: limegreen;
+	}
+
+	table {
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	#matrixglcanvas {
+		width:512px;
+		height:512px;
+	}
+</style>
+
+</head>
+<body>
+
+	<h1>Matrix multiplication benchmark </h1><h2>WebGL vs WebGPU vs JavaScript</h2>
+	<p>This demo shows the difference in performance
+		when naively multiplying some matrices.
+	<br />
+	<p>Hit the button to run. Typically, it'll take about 5 secs to multiply the larger
+		matrices in Javascript.
+	<br />
+	<br />
+	<input id="buttonTest" type="button" value="Start benchmark">
+	<br />
+	<br />
+	<br />
+	<br />
+	<table id="results-table" width="70%">
+		<tr class="header-row">
+			<td><b>Matrix size</b></td>
+			<td><b>Number of ops</b></td>
+			<td><b>Device</b></td>
+			<td><b>Time (msec)</b></td>
+		</tr>
+	</table>
+	<canvas id=matrixglcanvas width="128" height="128"></canvas>
+<script>
+	window.results = {
+		16: {},
+		32: {},
+		64: {},
+		128: {},
+		256: {},
+		512: {},
+		1024: {},
+		2048: {},
+		4096: {},
+	};
+	document.querySelector('#buttonTest').addEventListener('click', function() {
+		webgl_matrix_test().then(() => {
+			Object.entries(window.results).forEach(([size, devices]) => {
+				const rowString = `<tr>
+					<td><h1 class="matrix-size">${size}x${size}</h1></td>
+					<td>${devices['ops']}</td>
+					<td class="result-cell">WebGL<br/>WebGPU<br/>JavaScript</td>
+					<td class="result-cell">${devices['WebGL']}<br/>${devices['WebGPU']}<br/>${devices['JavaScript']}</td>
+				</tr>`;
+
+				const rowElement = document.createElement("tr");
+				rowElement.innerHTML = rowString;
+				document.querySelector('#results-table').append(rowElement);
+			});
+		});
+	}, false);
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
